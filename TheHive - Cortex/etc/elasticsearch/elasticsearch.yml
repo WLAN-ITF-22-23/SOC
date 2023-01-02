@@ -1,0 +1,13 @@
+...
+# Cortex configuration
+# https://github.com/TheHive-Project/CortexDocs/blob/master/installation/install-guide.md#24-configure-and-start-elasticsearch
+http.host: 127.0.0.1
+#http.host: 10.0.2.14
+cluster.name: hive
+#cluster.name: thehive
+thread_pool.search.queue_size: 100000
+
+node.name: node-1
+cluster.initial_master_nodes: ["node-1"]
+
+#network.host: 0.0.0.0

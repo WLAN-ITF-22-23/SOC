@@ -1,0 +1,2 @@
+GroupId,GroupName,VpcId,Description,OwnerId,InboundRulesCount,OutboundRulesCount,Tags
+sg-0f791adb96b22f1d8,SOC,vpc-0fecc55873e706555,Allow SOC access,883648635422,14,1,

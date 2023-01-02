@@ -1,0 +1,1 @@
+curl -XPOST -H 'Authorization: Bearer RKxaRjsfKozDQegpVVgvIMj7c1t9j7g8' http://10.0.2.14:9000/api/alert/$Create_alert.id/createCase

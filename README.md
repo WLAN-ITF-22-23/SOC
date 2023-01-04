@@ -72,7 +72,7 @@ After the instances are created, the following (local) IP addresses were assigne
 
 ## Setup
 
-The concept of this SOC was inspired by [Taylor Walton's video on combinging Shuffle, Wazuh, TheHive and Cortex](https://www.youtube.com/watch?v=FBISHA7V15c),
+The concept of this SOC was inspired by [Taylor Walton's video on combinging Shuffle, Wazuh, TheHive and Cortex](https://www.youtube.com/watch?v=FBISHA7V15c)[^9],
 as well as many of his other instructional video's and the official documentation of the various technologies used (see the [sources](#sources)).
 
 ### Wazuh
@@ -125,18 +125,18 @@ ssh -i "<fake SSH key>" ubuntu@ec2-<IP with - instead of .>.compute-1.amazonaws.
 
 [^4]: TheHive Project. (2022-07-07). *Installation Guide*. Retrieved from github.com: https://github.com/TheHive-Project/CortexDocs/blob/master/installation/install-guide.md#deb
 
-[^5]: Walton, T. (2021-06-25). TheHive - Build Your Own Security Operations Center (SOC). Retrieved from youtube.com: https://www.youtube.com/watch?v=VqIuP0AOCBg
+[^5]: Walton, T. (2021-06-25). *TheHive - Build Your Own Security Operations Center (SOC)*. Retrieved from youtube.com: https://www.youtube.com/watch?v=VqIuP0AOCBg
 
-[^6]: Walton, T. (2021-07-27). CORTEX - Analyze Observables (IPs, domains, etc.) at Scale! - Build Your Own Intelligence Platform! Retrieved from youtube.com: https://www.youtube.com/watch?v=qz6xtINwK3I
+[^6]: Walton, T. (2021-07-27). *CORTEX - Analyze Observables (IPs, domains, etc.) at Scale! - Build Your Own Intelligence Platform!*. Retrieved from youtube.com: https://www.youtube.com/watch?v=qz6xtINwK3I
 
-[^7]: Walton, T. (2021-07-29). TheHive and Cortex Integration - Add Intelligence to Your SOC! Retrieved from youtube.com: https://www.youtube.com/watch?v=lzsTSDJhAOw
+[^7]: Walton, T. (2021-07-29). *TheHive and Cortex Integration - Add Intelligence to Your SOC!*. Retrieved from youtube.com: https://www.youtube.com/watch?v=lzsTSDJhAOw
 
-[^8]: Walton, T. (2021-11-28). Host Your Own SOAR - Shuffle Install. Retrieved from youtube.com: https://www.youtube.com/watch?v=YDUKZojg0vk
+[^8]: Walton, T. (2021-11-28). *Host Your Own SOAR - Shuffle Install*. Retrieved from youtube.com: https://www.youtube.com/watch?v=YDUKZojg0vk
 
-[^9]: Walton, T. (2021-12-13). Shuffle + Wazuh + TheHIVE + Cortex = Automation Bliss. Retrieved from youtube.com: https://www.youtube.com/watch?v=FBISHA7V15c
+[^9]: Walton, T. (2021-12-13). *Shuffle + Wazuh + TheHIVE + Cortex = Automation Bliss*. Retrieved from youtube.com: https://www.youtube.com/watch?v=FBISHA7V15c
 
-[^10]: Wazuh Inc. (n.d.). All-in-one deployment. Retrieved from documentation.wazuh.com: https://documentation.wazuh.com/current/deployment-options/elastic-stack/all-in-one-deployment/index.html#adding-the-elastic-stack-repository
+[^10]: Wazuh Inc. (n.d.). *All-in-one deployment*. Retrieved from documentation.wazuh.com: https://documentation.wazuh.com/current/deployment-options/elastic-stack/all-in-one-deployment/index.html#adding-the-elastic-stack-repository
 
-[^11]: Wazuh Inc. (n.d.). Architecture. Retrieved from documentation.wazuh.com: https://documentation.wazuh.com/current/getting-started/architecture.html#required-ports
+[^11]: Wazuh Inc. (n.d.). *Architecture*. Retrieved from documentation.wazuh.com: https://documentation.wazuh.com/current/getting-started/architecture.html#required-ports
 
-[^12]: Wazuh Inc. (n.d.). Wazuh indexer. Retrieved from documentation.wazuh.com: https://documentation.wazuh.com/current/installation-guide/wazuh-indexer/index.html
+[^12]: Wazuh Inc. (n.d.). *Wazuh indexer*. Retrieved from documentation.wazuh.com: https://documentation.wazuh.com/current/installation-guide/wazuh-indexer/index.html

@@ -75,7 +75,13 @@ After the instances are created, the following (local) IP addresses were assigne
 The concept of this SOC was inspired by [Taylor Walton's video on combinging Shuffle, Wazuh, TheHive and Cortex](https://www.youtube.com/watch?v=FBISHA7V15c)[^9],
 as well as many of his other instructional video's and the official documentation of the various technologies used (see the [sources](#sources)).
 
+All instances had their timezone (manually) set with the following command:
+```shell
+sudo timedatectl set-timezone Europe/Brussels
+```
+
 ### Wazuh
+The Wazuh instance was created following the [installation assistant](https://documentation.wazuh.com/current/installation-guide/wazuh-indexer/installation-assistant.html).[^12]
 
 ### Wazuh agent
 
@@ -108,11 +114,13 @@ sudo service cortex start
 sudo service elasticsearch start
 ```
 
-
 ## Workflow
 
 ### Attack
-ssh -i "<fake SSH key>" ubuntu@ec2-<IP with - instead of .>.compute-1.amazonaws.com
+
+```PowerShell
+ssh -i "<path to fake SSH key>" ubuntu@ec2-<agent IP with - instead of .>.compute-1.amazonaws.com
+```
 
 ## Project status
 

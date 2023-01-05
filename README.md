@@ -282,14 +282,111 @@ service thehive start
 
 The TheHive dashboard is now accessible at *http://<TheHive instance public IP>:9000*, using the username "admin@thehive.local" and password "secret".  
 Next, create a new organization and a org-admin user in this organization.  
-In this SOC, an organization named SOC was created with org-admin user "data@soc.com".  
+In this SOC, an organization named "SOC" was created with org-admin user "data@soc.com".  
 Create a password for this user and generate an API key. Be sure to save these somewhere for later.
 
 
 <img src="assets/TheHive - Cortex/TheHive organization.png" alt="TheHive organization" width="75%"/>
 
-
 #### Cortex
+
+Cortex was installed following the [GitHub install guide](https://github.com/TheHive-Project/CortexDocs/blob/master/installation/install-guide.md)[^4]
+and a [video tutorial](https://www.youtube.com/watch?v=qz6xtINwK3I)[^6]. 
+
+First, ElasticSearch must be installed. For this, the [Wazuh documentation](https://documentation.wazuh.com/current/deployment-options/elastic-stack/all-in-one-deployment/index.html#adding-the-elastic-stack-repository) was followed.[^10]
+
+```sh
+curl -s https://artifacts.elastic.co/GPG-KEY-elasticsearch | gpg --no-default-keyring --keyring gnupg-ring:/usr/share/keyrings/elasticsearch.gpg --import && chmod 644 /usr/share/keyrings/elasticsearch.gpg
+echo "deb [signed-by=/usr/share/keyrings/elasticsearch.gpg] https://artifacts.elastic.co/packages/7.x/apt stable main" | tee /etc/apt/sources.list.d/elastic-7.x.list
+apt-get update
+apt-get install elasticsearch=7.17.6
+curl -so /etc/elasticsearch/elasticsearch.yml https://packages.wazuh.com/4.3/tpl/elastic-basic/elasticsearch_all_in_one.yml
+```
+
+The file /etc/elasticsearch/elasticsearch.yml was modified to allow it to correctly integrate with our SOC.
+The code that was added to the end can be found in the [elasticsearch.yml](/TheHive%20-%20Cortex/etc/elasticsearch/elasticsearch.yml) file on this repo.
+
+After this, the service can be started:
+```sh
+service elasticsearch start
+```
+
+After this, Cortex can be installed using the [GitHub DEB instructions](https://github.com/TheHive-Project/CortexDocs/blob/master/installation/install-guide.md#deb)[^4]:
+```sh
+curl https://raw.githubusercontent.com/TheHive-Project/TheHive/master/PGP-PUBLIC-KEY | sudo apt-key add -
+echo 'deb https://deb.thehive-project.org release main' | sudo tee -a /etc/apt/sources.list.d/thehive-project.list
+sudo apt-get update
+apt install cortex
+```
+
+The configuration in /etc/cortex/application.conf must be changed according to the example [application.conf](/TheHive%20-%20Cortex/etc/cortex/application.conf) file on this repo.  
+Additionally, the correct secret key must be added to the Cortex application file:
+```sh
+sudo mkdir /etc/cortex
+(cat << _EOF_
+# Secret key
+# ~~~~~
+# The secret key is used to secure cryptographics functions.
+# If you deploy your application to several instances be sure to use the same key!
+play.http.secret.key="$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 64 | head -n 1)"
+_EOF_
+) | sudo tee -a /etc/cortex/application.conf
+```
+
+Now, the service can be started:
+```sh
+service cortex start
+```
+
+The Cortex dashboard is now accessible at *http://<TheHive instance public IP>:9001*, using the username "admin" and password "admin".  
+Here, click on "Update Database". If prompted, create an admin account and log in.  
+Next, create a new organization and a org-admin user in this organization.  
+In this SOC, an organization named "SOC" was created with org-admin user "data.cortex@soc.com".  
+A user named "api" was also created to handle Shuffle.io api requests later.
+Create a password for this user and generate an API key. Be sure to save these somewhere for later.
+
+<img src="assets/TheHive - Cortex/Cortex organization.png" alt="Cortex organization" width="75%"/>
+
+After this, Analyzers and Responders must be added to Cortex to increase functionality.  
+This will be done using the [GitHub installation guide](https://github.com/TheHive-Project/CortexDocs/blob/master/installation/install-guide.md#installation).[^4]  
+
+First, the correct packages must be installed:
+```sh
+cd /opt/cortex/
+git clone https://github.com/TheHive-Project/Cortex-Analyzers
+sudo apt-get install -y --no-install-recommends python-pip python2.7-dev python3-pip python3-dev ssdeep libfuzzy-dev libfuzzy2 libimage-exiftool-perl libmagic1 build-essential git libssl-dev
+sudo pip install -U pip setuptools && sudo pip3 install -U pip setuptools && sudo pip2 install -U pip setuptools
+```
+
+Beware, this might not always work properly. If certain services and commands fail later, it might be required to go back and install some of these packages separately. Particularly the python2 and python3 packages can fail at times.
+
+Then, All the requirements in the repo must be installed:
+```sh
+for I in $(find Cortex-Analyzers -name 'requirements.txt'); do sudo -H pip2 install -r $I; done && \
+for I in $(find Cortex-Analyzers -name 'requirements.txt'); do sudo -H pip3 install -r $I || true; done
+```
+
+Restart the Cortex and ElasticSearch services and navigate to the Cortex Dashboard.
+
+Go to Organization > Analyzers and add the desired analyzers.  
+For this SOC, the following analyzers were [enabled](#project-status):
+- AbuseIPDB
+- MaxMind GeoIP
+- Shodan
+- Talos
+- Virustotal
+
+<img src="assets/TheHive - Cortex/Cortex analyzers.png" alt="Cortex analyzers" width="75%"/>
+
+## Workflow
+
+### Attack
+
+```PowerShell
+ssh -i "<path to fake SSH key>" ubuntu@ec2-<agent IP with - instead of .>.compute-1.amazonaws.com
+```
+
+[Video Demo](https://youtu.be/IM6t_1suqWU).
 
 ## Learner Lab / VM restart
 
@@ -316,15 +413,10 @@ sudo service cortex start
 sudo service elasticsearch start
 ```
 
-## Workflow
-
-### Attack
-
-```PowerShell
-ssh -i "<path to fake SSH key>" ubuntu@ec2-<agent IP with - instead of .>.compute-1.amazonaws.com
-```
 
 ## Project status
+
+The VirusTotal and Talos analysises on Cortex do work, but does not return a report summary, which means it does not "tag" the event in TheHive. Because of this, VirusTotal and Talos are not used in the workflow.
 
 ## Sources
 [^1]: Randhawa, J. (2018-06-29). *Set permission of file equivalent to chmod 400 on Windows*. Retrieved from gist.github.com: https://gist.github.com/jaskiratr/cfacb332bfdff2f63f535db7efb6df93
@@ -333,7 +425,7 @@ ssh -i "<path to fake SSH key>" ubuntu@ec2-<agent IP with - instead of .>.comput
 
 [^3]: TheHive Project. (2021-06-02). *Step-by-Step guide*. Retrieved from docs.thehive-project.org: https://docs.thehive-project.org/thehive/installation-and-configuration/installation/step-by-step-guide/
 
-[^4]: TheHive Project. (2022-07-07). *Installation Guide*. Retrieved from github.com: https://github.com/TheHive-Project/CortexDocs/blob/master/installation/install-guide.md#deb
+[^4]: TheHive Project. (2022-07-07). *Installation Guide*. Retrieved from github.com: https://github.com/TheHive-Project/CortexDocs/blob/master/installation/install-guide.md
 
 [^5]: Walton, T. (2021-06-25). *TheHive - Build Your Own Security Operations Center (SOC)*. Retrieved from youtube.com: https://www.youtube.com/watch?v=VqIuP0AOCBg
 

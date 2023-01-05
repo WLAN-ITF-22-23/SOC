@@ -388,9 +388,103 @@ It is also advised to upload some templates, as shown in the video tutorial at [
 
 ## Workflow
 
-The concept of this SOC was inspired by [Taylor Walton's video on combinging Shuffle, Wazuh, TheHive and Cortex](https://www.youtube.com/watch?v=FBISHA7V15c).[^9]
+The concept of this SOC was inspired by [Taylor Walton's video on combinging Shuffle, Wazuh, TheHive and Cortex](https://www.youtube.com/watch?v=FBISHA7V15c).[^9]  
+On the Shuffle.io dashboard, a new workflow named "SOC" was created.  
+The full configuration of this workflow can be found in [/Shuffle/Shuffle.io.workflow.json](/Shuffle/Shuffle.io.workflow.json),  
+which can be easily imported into Shuffle via the dashboard.
+
+<img src="assets/Shuffle/Workflow.png" alt="Shuffle Workflow" width="75%"/>
+
+### Wazuh Alert
+
+The workflow starts when Wazuh detects an appropriate event. 
+This event is then sent to Shuffle through a webhook.
+
+On the Shuffle Workflow, create a Webhook Trigger and name it "Wazuh Alert".
+Copy the webhook URI and go to the Wazuh instance.  
+In /var/ossec/etc/ossec.conf, add an integration code block.  
+An example of this can be found in the [ossec.conf](/Wazuh/var/ossec/etc/ossec.conf) file in this repo.  
+The selected rule ID, **5762**, triggers when an SSH connection is refused.
+
+The scripts required for the webhook to function can be downloaded with the following code:
+```sh
+cd /var/ossec/integrations
+curl -sO https://github.com/Shuffle/Shuffle/blob/main/functions/extensions/wazuh/custom-shuffle
+curl -sO https://github.com/Shuffle/Shuffle/blob/main/functions/extensions/wazuh/custom-shuffle.py
+chown root:wazuh custom-shuffle*
+chmod 750 custom-shuffle*
+```
+The content of these files does not need to be changed.
+
+Lastly, restart the Wazuh service.  
+You can check if the communication is working with the logfile:
+```sh
+systemctl restart wazuh-manager
+tail -f /var/ossec/logs/integrations.log
+```
+
+### Echo
+
+The Wazuh Alert connects to a simple Shuffle Tool named "Echo" which repeats the alert data.  
+This is used by later apps for easier reference.
+
+### Create alert
+
+Now, a TheHive app (1.1.3) will be used to show these alerts on the TheHive dashboard.  
+First, create an authentication setting for TheHive.
+- Name: Auth for thehive
+- apikey: <the organization's user's API key>
+- url: http://<the TheHive instance's **local** IP address>:9000/ (ex: http://10.0.2.14:9000/)
+- organization: <the organizaion to which the API key user belongs> (ex: SOC)
+
+The sourceref must be unique, so the id timestamp is used. 
+The title is the (attacking) source IP address and the rule that triggered the alert.
+
+### Add observable
+
+We want to use the source IP address for analysis, so it must be added as an observable.  
+The next TheHive app adds an alert artifact to the alert, namely the source IP of the SSH request.
+
+### Create case
+
+To properly analyse these observables, a case must be created in TheHive.  
+Normally, you'd execute this using another TheHive app, but this gives an authorization error.  
+Luckily, this is also possible with a simple HTTP curl request.
+The following statement is used:
+```
+curl -XPOST -H 'Authorization: Bearer <API key>' http://10.0.2.14:9000/api/alert/$Create_alert.id/createCase
+```
+
+### Get artifact
+
+After this, we want to retrieve the observable again for the Cortex analysis.  
+For this, another TheHive app is used to get the case artifacts based on the ID sent with the Create Case app.
+
+### Run analysis
+
+Now, the workflow splits to three analyzer jobs, once again TheHive apps.  
+The Cortex ID is based on your cortex configuration and can be found by going to your TheHive dashboard and selecting "About" in the upper right corner.
+
+<img src="assets/TheHive - Cortex/Cortex ID.png" alt="Cortex ID" width="75%"/>
+
+The Analyzer ID can be found in the Cortex dashboard on the Analyzers tab (ex: AbuseIPDB_1_0).  
+Using the earlier retrieved artifact, an analysis is run for AbuseIP, GeoIP and Shodan.  
+Do note that Shodan only gives a report summary if the IP is found. If not, it will not show up on the dashboard.
+
+### Post to Discord
+
+Lastly, to make sure our busy analyst notices the alert, a post is made to the SOC's Discord server via a Webhook.  
+The message is formatted to show the source IP, triggered rule and the actual trigger in more detail.
 
 ### Attack
+
+The trigger is started at a refused SSH login attempt.  
+Because of the nature of AWS, credential-based SSH connections are blocked by default.  
+Therefore, it is best to create a "fake" key by copying your ssh key and changing a few lines of code.  
+Do note that this needs to be done with a bit of care;  
+Too many modifications and the key will be refused as a bad key.  
+Too little modifications and the key will just be accepted (I know, crazy right?).
+Then, you can attempt to access the instance with the following command:
 
 ```PowerShell
 ssh -i "<path to fake SSH key>" ubuntu@ec2-<agent IP with - instead of .>.compute-1.amazonaws.com

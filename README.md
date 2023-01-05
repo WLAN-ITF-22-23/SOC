@@ -46,7 +46,7 @@ However, for the scale of this project one group will suffice.
 The configuration of this security group and its rules can be found in [AWS\SecurityGroup](AWS/SecurityGroup/).  
 The CSV files found here can be imported into AWS.
 
-The inbound rules for Wazuh were based on the [Wazuh documentation](https://documentation.wazuh.com/current/getting-started/architecture.html#required-ports).
+The inbound rules for Wazuh were based on the [Wazuh documentation](https://documentation.wazuh.com/current/getting-started/architecture.html#required-ports)[^11].
 
 <img src="assets/AWS/Security Group inbound rules.png" alt="inbound rules" width="75%"/>
 
@@ -93,6 +93,87 @@ sudo timedatectl set-timezone Europe/Brussels
 
 ### Wazuh
 The Wazuh instance was created following the [installation assistant](https://documentation.wazuh.com/current/installation-guide/wazuh-indexer/installation-assistant.html).[^12]
+
+#### Indexer
+
+Download the Wazuh installation assistant and the configuration file:
+
+```sh
+curl -sO https://packages.wazuh.com/4.3/wazuh-install.sh
+curl -sO https://packages.wazuh.com/4.3/config.yml
+```
+
+The configuration file 'config.yml' was edited to resemble the file in the [Wazuh directory](/Wazuh/~/config.yml).
+
+Then, the Wazuh cluster key, certificates and passwords are generated with the following command:
+
+```sh
+bash wazuh-install.sh --generate-config-files
+```
+
+Next, the indexer nodes are installed.
+```sh
+curl -sO https://packages.wazuh.com/4.3/wazuh-install.sh
+bash wazuh-install.sh --wazuh-indexer node-1
+```
+
+After this, the cluster is initialized.
+```sh
+bash wazuh-install.sh --start-cluster
+```
+
+To get the password belonging to the **admin**-user, use the following command:
+```sh
+tar -axf wazuh-install-files.tar wazuh-install-files/wazuh-passwords.txt -O | grep -P "\'admin\'" -A 1
+```
+
+To confirm the installation, use the following command, replacing <ADMIN_PASSWORD> with the password received in the command above.
+Replace <WAZUH_INDEXER_IP> with the IP set in the config file, 10.0.2.9 in this case.
+```sh
+# Check the installation
+curl -k -u admin:<ADMIN_PASSWORD> https://<WAZUH_INDEXER_IP>:9200
+# Check if the cluster is working correctly
+curl -k -u admin:<ADMIN_PASSWORD> https://<WAZUH_INDEXER_IP>:9200/_cat/nodes?v
+```
+
+The output should look like this:
+```json
+{
+  "name" : "node-1",
+  "cluster_name" : "wazuh-cluster",
+  "cluster_uuid" : "cMeWTEWxQWeIPDaf1Wx4jw",
+  "version" : {
+    "number" : "7.10.2",
+    "build_type" : "rpm",
+    "build_hash" : "e505b10357c03ae8d26d675172402f2f2144ef0f",
+    "build_date" : "2022-01-14T03:38:06.881862Z",
+    "build_snapshot" : false,
+    "lucene_version" : "8.10.1",
+    "minimum_wire_compatibility_version" : "6.8.0",
+    "minimum_index_compatibility_version" : "6.0.0-beta1"
+  },
+  "tagline" : "The OpenSearch Project: https://opensearch.org/"
+}
+```
+
+#### Server
+
+In the same directory as before, run:
+```sh
+bash wazuh-install.sh --wazuh-server wazuh-1
+```
+
+That's it! Easy, innit?
+
+#### Dashboard
+
+The dashboard is not really required for this SOC, but it gives a nice overview when troubleshooting.
+It is installed with the following code:
+```sh
+bash wazuh-install.sh --wazuh-dashboard dashboard
+```
+
+You can now access the Wazuh dashboard at *https://<Wazuh instance public IP>* using the username "admin" and the password requested earlier.
 
 ### Wazuh agent
 

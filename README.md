@@ -60,6 +60,17 @@ The inbound rules for Wazuh were based on the [Wazuh documentation](https://docu
 | TheHive | Ubuntu Server 22.04 LTS | ami-0574da719dca65348 (64-bit (x86)) | t2.medium | pckey.pem | [SOC-vpc](#vpc) | 10.0.2.0/28 | Enable | [SOC](#security-group) | 50 GB |
 
 The key pair "pckey.pem" was created to access these instances over SSH.  
+To set the right permissions on the key, the following commands were executed:[^1]
+```PowerShell
+$path = "~\.ssh\pckey.pem"
+# Reset to remove explict permissions
+icacls.exe $path /reset
+# Give current user explicit read-permission
+icacls.exe $path /GRANT:R "$($env:USERNAME):(R)"
+# Disable inheritance and remove inherited permissions
+icacls.exe $path /inheritance:r
+```
+
 Public IP addresses are assigned dynamically on startup and thus change regularly.  
 After the instances are created, the following (local) IP addresses were assigned:
 

@@ -217,6 +217,80 @@ The creation of the actual workflow is explained in more detail in [Workflow](#w
 
 ### TheHive and Cortex
 
+Both TheHive and Cortex were installed on the same EC2 instance. All of the following commands were done with root user privileges.
+
+#### TheHive
+
+TheHive was installed following the [official documentation](https://docs.thehive-project.org/thehive/installation-and-configuration/installation/step-by-step-guide/)[^3]
+and a [video tutorial](https://youtu.be/VqIuP0AOCBg)[^5].
+
+First, Java is installed:
+```sh
+apt-get install -y openjdk-8-jre-headless
+echo JAVA_HOME="/usr/lib/jvm/java-8-openjdk-amd64" >> /etc/environment
+export JAVA_HOME="/usr/lib/jvm/java-8-openjdk-amd64"
+```
+
+Then, the Apache Cassandra database is installed:
+```sh
+curl -fsSL https://www.apache.org/dist/cassandra/KEYS | sudo apt-key add -
+echo "deb http://www.apache.org/dist/cassandra/debian 311x main" | sudo tee -a /etc/apt/sources.list.d/cassandra.sources.list
+sudo apt update
+sudo apt install cassandra
+```
+
+Cassandra is configured with the following commands:
+```sh
+cqlsh localhost 9042
+```
+
+```console
+cqlsh> UPDATE system.local SET cluster_name = 'thp' where key='local';
+```
+
+```sh
+nodetool flush
+```
+
+The file /etc/cassandra/cassandra.yml is edited.  
+The elements that were changed can be found in [cassandra.yml](/TheHive%20-%20Cortex/etc/cassandra/cassandra.yaml) on this repo.
+
+Then, the service is restarted.
+
+```sh
+service cassandra restart
+```
+
+Now, TheHive can be installed:
+```sh
+curl https://raw.githubusercontent.com/TheHive-Project/TheHive/master/PGP-PUBLIC-KEY | sudo apt-key add -
+echo 'deb https://deb.thehive-project.org release main' | sudo tee -a /etc/apt/sources.list.d/thehive-project.list
+sudo apt-get update
+sudo apt-get install thehive4
+# Ensure the following directories exist and have the right (group) owner
+chown -R thehive:thehive /opt/thp/thehive/files
+chown thehive:thehive -R /opt/thp/thehive/index
+```
+
+Then, the file /etc/thehive/application.conf must be edited.  
+An example for this can be found in [application.conf](/TheHive%20-%20Cortex/etc/thehive/application.conf) on this repo.
+
+Then, the service can be started:
+```sh
+service thehive start
+```
+
+The TheHive dashboard is now accessible at *http://<TheHive instance public IP>:9000*, using the username "admin@thehive.local" and password "secret".  
+Next, create a new organization and a org-admin user in this organization.  
+In this SOC, an organization named SOC was created with org-admin user "data@soc.com".  
+Create a password for this user and generate an API key. Be sure to save these somewhere for later.
+
+
+<img src="assets/TheHive - Cortex/TheHive organization.png" alt="TheHive organization" width="75%"/>
+
+
+#### Cortex
+
 ## Learner Lab / VM restart
 
 When the VM's are stopped and restarted, the public IP address changes.  

@@ -3,7 +3,29 @@ I have created a small SOC in my AWS environment.
 This repo contains instructions and relevant files to recreate my setup.
 
 ## Table of Contents
-*fill in later**
+1. [Overview](#overview)
+2. [AWS Infrastructure](#aws-infrastructure)
+    1. [VPC](#vpc)
+    2. [Security Group](#security-group)
+    3. [EC2 instances](#ec2-instances)
+3. [Setup](#setup)
+    1. [Wazuh](#wazuh)
+    2. [Wazuh agent](#wazuh-agent)
+    3. [Shuffle.io](#shuffleio)
+    4. [TheHive and Cortex](#thehive-and-cortex)
+4. [Workflow](#workflow)
+    1. [Wazuh Alert](#wazuh-alert)
+    2. [Echo](#echo)
+    3. [Create alert](#create-alert)
+    4. [Add observable](#add-observable)
+    5. [Create case](#create-case)
+    6. [Get artifact](#get-artifact)
+    7. [Run analysis](#run-analysis)
+    8. [Post to Discord](#post-to-discord)
+    9. [Attack](#attack)
+5. [Learner Lab / instance restart](#learner-lab--instance-restart)
+6. [Project status](#project-status)
+7. [Sources](#sources)
 
 ## Overview
 
@@ -492,9 +514,9 @@ ssh -i "<path to fake SSH key>" ubuntu@ec2-<agent IP with - instead of .>.comput
 
 [Video Demo](https://youtu.be/IM6t_1suqWU).
 
-## Learner Lab / VM restart
+## Learner Lab / instance restart
 
-When the VM's are stopped and restarted, the public IP address changes.  
+When the instances are stopped and restarted, the public IP address changes.  
 This happens when the learner lab restarts.  
 In this case, the following actions need to be taken:  
 

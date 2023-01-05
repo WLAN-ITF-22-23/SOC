@@ -177,7 +177,43 @@ You can now access the Wazuh dashboard at *https://<Wazuh instance public IP>* u
 
 ### Wazuh agent
 
+The Wazuh agent is a simple, lightweight Ubuntu server with the default Wazuh agent configuration applied.  
+These instructions can be found using the [Wazuh Dashboard](#dashboard), and go as follows:
+```sh
+curl -so wazuh-agent-4.3.10.deb https://packages.wazuh.com/4.x/apt/pool/main/w/wazuh-agent/wazuh-agent_4.3.10-1_amd64.deb && sudo WAZUH_MANAGER='10.0.2.9' WAZUH_AGENT_GROUP='SOC' dpkg -i ./wazuh-agent-4.3.10.deb
+sudo systemctl daemon-reload
+sudo systemctl enable wazuh-agent
+sudo systemctl start wazuh-agent
+```
+
+Assuming the IP is set to 10.0.2.9 and you created a group named SOC.  
+The group is not necessary for this SOC, but could be used for other configurations.  
+You can just add the agent to the default group if you wish.
+
 ### Shuffle.io
+
+Shuffle.io was installed using the [official Shuffle documentation](https://shuffler.io/docs/configuration)[^2]
+and a [video tutorial](https://youtu.be/YDUKZojg0vk)[^8].
+
+First, install Docker and Docker-compose:
+```sh
+sudo snap install docker
+```
+
+Next, install Shuffle:
+```sh
+git clone https://github.com/frikky/Shuffle
+cd Shuffle
+docker-compose up -d
+```
+
+Ensure that the shuffle-database folder has the right owner/group:
+```sh
+sudo chown 1000:1000 -R shuffle-database
+```
+
+You can now log in to the Shuffle.io dashboard via *https://<Shuffle instance public IP>:3443*, using the username "admin" and password "admin".  
+The creation of the actual workflow is explained in more detail in [Workflow](#workflow).
 
 ### TheHive and Cortex
 

@@ -83,9 +83,6 @@ After the instances are created, the following (local) IP addresses were assigne
 
 ## Setup
 
-The concept of this SOC was inspired by [Taylor Walton's video on combinging Shuffle, Wazuh, TheHive and Cortex](https://www.youtube.com/watch?v=FBISHA7V15c)[^9],
-as well as many of his other instructional video's and the official documentation of the various technologies used (see the [sources](#sources)).
-
 All instances had their timezone (manually) set with the following command:
 ```shell
 sudo timedatectl set-timezone Europe/Brussels
@@ -378,7 +375,20 @@ For this SOC, the following analyzers were [enabled](#project-status):
 
 <img src="assets/TheHive - Cortex/Cortex analyzers.png" alt="Cortex analyzers" width="75%"/>
 
+#### TheHive and Cortex integration
+
+After this, Cortex needs to be integrated with TheHive.  
+For this, Taylor Walton's [video tutorial](https://www.youtube.com/watch?v=lzsTSDJhAOw) was used.[^7]
+The "api" user created earlier will be used.  
+Copy the API key belonging to this user and add it to /etc/thehive/application.conf.  
+For the configuration, see the last code block in the [application.conf](/TheHive%20-%20Cortex/etc/thehive/application.conf) file in this repo.  
+After this, restart the TheHive service. Now, it should be possible to run Cortex analyses on TheHive observables.
+
+It is also advised to upload some templates, as shown in the video tutorial at [8:28](https://youtu.be/lzsTSDJhAOw?t=508).[^7]
+
 ## Workflow
+
+The concept of this SOC was inspired by [Taylor Walton's video on combinging Shuffle, Wazuh, TheHive and Cortex](https://www.youtube.com/watch?v=FBISHA7V15c).[^9]
 
 ### Attack
 
@@ -412,7 +422,6 @@ sudo service thehive start
 sudo service cortex start
 sudo service elasticsearch start
 ```
-
 
 ## Project status
 

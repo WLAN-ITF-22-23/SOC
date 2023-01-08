@@ -502,14 +502,14 @@ In the URL section, the urls "https://discord.com" or "https://discord.com" can 
 In the Webhook URL section, the URL part **after** "/api/webhooks/" should be put in.
 
 The chosen message format is:
-```
+````
 WAZUH Alert:
 ```
 Source IP: $echo.all_fields.data.srcip \n
 Rule: $echo.title \n
 Detail: $echo.text
 ```
-```
+````
 
 ### Attack
 

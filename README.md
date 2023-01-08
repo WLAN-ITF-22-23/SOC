@@ -498,6 +498,19 @@ Do note that Shodan only gives a report summary if the IP is found. If not, it w
 Lastly, to make sure our busy analyst notices the alert, a post is made to the SOC's Discord server via a Webhook.  
 The message is formatted to show the source IP, triggered rule and the actual trigger in more detail.
 
+In the URL section, the urls "https://discord.com" or "https://discord.com" can be used. 
+In the Webhook URL section, the URL part **after** "/api/webhooks/" should be put in.
+
+The chosen message format is:
+```
+WAZUH Alert:
+```
+Source IP: $echo.all_fields.data.srcip \n
+Rule: $echo.title \n
+Detail: $echo.text
+```
+```
+
 ### Attack
 
 The trigger is started at a refused SSH login attempt.  
